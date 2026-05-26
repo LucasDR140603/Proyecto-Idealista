@@ -25,3 +25,7 @@ Primer anális: precio. Se cree que puede ser una distribución log nomral pero 
 
 Analisis del periodo indica que los datos reflejan datos agrupados por 
 
+
+Se ce que en la columan añode construción no es fiable casi la mitad son nans y exiten valores imposibles como año 1 o años en el futuro se descarta el uso de esa columna
+
+
