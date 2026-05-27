@@ -31,7 +31,12 @@ De entre las columnas contenidas en `binarios` se tratan de forma distinta las l
 
 La columna `PERIOD` sólo tiene 4 valores: "201803", "201806", "201809" y "201812". Por lo que se deduce que los datos corresponden a un periodo de 2018 y se divide por trimestres. Se desconoce si estos datos correponede los pisos vendidos o publicados u otro criterio. 
 
+### ANÁLISIS DE DATOS ANÓMALOS.
 
+Al realizar una análisis visual de todas las columnas numéricas se detectan y tratan las siguientes anomalías:
++ En las columas de "distancia a" (`DISTANCE_TO_CITY_CENTER`,`DISTANCE_METRO` y `DISTANCE_TO_STREET`):
+    + Se detecta que hay 1 fila que se encuentra a más de 400 kms. Como esta fila no corresponde a ninguna ciudad de las estudiadas se decide eliminar esta fila por considerarse un dato no confiable. Es posible que los datos sean correctos pero no se debe tener encuenta para trabajar con datos representativos de las ciudades estudiadas.
+    + 
 
 ### ANÁLISIS DEL TIPO DE NANs.
 
