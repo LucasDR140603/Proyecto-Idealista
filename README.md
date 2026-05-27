@@ -36,7 +36,21 @@ La columna `PERIOD` sólo tiene 4 valores: "201803", "201806", "201809" y "20181
 Al realizar una análisis visual de todas las columnas numéricas se detectan y tratan las siguientes anomalías:
 + En las columas de "distancia a" (`DISTANCE_TO_CITY_CENTER`,`DISTANCE_METRO` y `DISTANCE_TO_STREET`):
     + Se detecta que hay 1 fila que se encuentra a más de 400 kms. Como esta fila no corresponde a ninguna ciudad de las estudiadas se decide eliminar esta fila por considerarse un dato no confiable. Es posible que los datos sean correctos pero no se debe tener encuenta para trabajar con datos representativos de las ciudades estudiadas.
-    + 
+
++ Análisis sobre las columnas `ISPARKINGSPACEINCLUDEDINPRICE` y `PARKINGSPACEPRICE`
+    + Cuando`ISPARKINGSPACEINCLUDEDINPRICE` es "True", en casi todos las filas (31892) el valor de `PARKINGSPACEPRICE` es de 1, lo que parece indicar que 1 es un valor por defecto cuendo `ISPARKINGSPACEINCLUDEDINPRICE` es TRUE.<br>
+    Pero existen 13 valores mayores a 1 que curiosamente acaban en 1 (16501 €, por ejemplo) esto lleva a pensar que cuando se crearon los datos se añadió automaticamente el valor 1 a una columna en la que se esperaba que el valor fuese nulo.<br>
+    Por homogeneizar el df se van cambiar los valores a 1 al considerarlos errores.
+    
+    + Siguiendo con la columna `PARKINGSPACEPRICE` en ella se detectan un numero elevado de _outliers_.<br>
+    En el DataFrame el precio del parking como valor 1 representa el 97,5%.<br>
+    Pero lo más curioso es que el 100% de los inmuebles que tienen marcado un precio superior a 1 tambien tiene como valor de "HASPARKINGSPACE" un False.<br>
+    Estos valores tienen un precio muy raro ya que en algunos casos tiene un precio superior al valor del propio piso y de media representan un 92% del valor de piso.<br>
+    Por estos motivos se decide transformar estas filas en "PARKINGSPACEPRICE" = 1.<br>
+    Como resultado de esto el 100% del valor de la columna PARKINGSPACEPRICE es 1. Lo que la hace inutil pero ya de por si los datos eran muy poco fiables.
+
+
+
 
 ### ANÁLISIS DEL TIPO DE NANs.
 
