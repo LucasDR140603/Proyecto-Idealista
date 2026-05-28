@@ -1,5 +1,7 @@
 # Proyecto Idealista
 
+## NOTEBOOK 1
+
 ### CONTEXTO Y ANÁLISIS PREVIO
 Los csv con los que se han trabajado contienen datos de pisos de obtenidos de :
 1. Madrid y Barcelona
@@ -66,13 +68,35 @@ Representa el número de planta del piso.
 Haciendo una tabla de correlación `df[df["FLOORCLEAN"].notna()].corr(numeric_only=True)['FLOORCLEAN'].abs().sort_values(ascending=False).iloc[1:]` No se obtiene ningún valor alto de correlación con ninguna otra columna por lo que se entiende que los NaNs existentes son completamente aleatorios.
 Se podría pensar que los NaNs podrían venir de los pisos que son especiales como los "estudios" (`ISSTUDIO`), los duplex (`ISDUPLEX`) o las entreplantas (`ISINTOPFLOOR`) pero al contarlos con `df[(df['ISDUPLEX']== True) | (df['ISINTOPFLOOR']== True) | (df['ISSTUDIO']== True) ]['FLOORCLEAN'].isna().sum()` se obtiene un total de 481. Aproximadamente un 5% de los NaNs por lo que refuerza la idea de que la distribución los valores NaN de esta columna es aleatoria y por tanto confiables.
 
-Por último la columna `CADASTRALQUALITYID` solo contiene un único valor de NaN. 
+Por último la columna `CADASTRALQUALITYID` solo contiene un único valor de NaN.
 
+### ANÁLISIS DE PRICE, UNITPRICE, CONSTRUCTEDAREA Y CORRELACIONES
 
+Una vez limpiados los datos se analiza la forma y distribución de las columnas de PRICE, UNITPRICE y CONSTRUCTEDAREA tanto en escala normal como en logarítmica. Se llega a la conclusión de que la distribución de la colmna UNITPRICE varía mucho dependiendo de la ciudad. Se ve que existe una correlación fuerte entre CONSTRUCTEDAREA y PRICE, por lo que se decide analizar en profundidad en el siguiente notebook. También se ve que en el caso de Madrid se ve un impacto de la latitud sobre el precio, por la forma del centro de la ciudad.
 
+Se crea el csv datos_limpios.csv como output de este notebook
 
+## NOTEBOOK 2
 
+Trabajamos con el csv de datos_limpios.csv.
+Analizamos la columna `CADASTRALQUALITYID` y según su análisis con respecto al precio unitario parece que a menor valor mayor es la calidad, sin embargo los valores 0 son abundantes y no presentan datos extraños en las demás columnas, por lo que no parece que sean errores.
+Por otro lado la columna `BUILTTYPEID` va del 1 al 3 a mayor valor mayores pueden llegar a ser los precios, aunque todos tienen mínimos similares.
 
+### REGRESIÓN LINEAL
 
+Elegimos las columnas `LOG_CONSTRUCTEDAREA` y `LOG_PRICE` como variables predictora y objetivo respectivamente, debido a su alta correlación y relativa normalidad. Al crear, entrenar y probar el modelo. Vemos que:
+- MAE: 0.44
+- MSE: 0.29
+- RMSE: 0.54 -> Un poco más alto que el mean absolute error, por lo que tenemos outliers.
+- R2: 0.46 -> No llega a 1 pero tampoco es 0, por lo que es el modelo es mejor que usar el promedio pero no es perfecto.
 
+El análisis de residuos muestra una curva sobre la línea de la regresión lineal y desviaciones más pronunciadas en los extremos, lo que nos indica que el modelo está sesgado y con outliers.
 
+La gráfica de distribución de los residuos no encaja con la curva de normalidad teórica y el test Kolmogorov-Smirnov (con los residuos estandarizados) nos dá un pvalue muy inferior a 0.05, por lo que no son normales. Es decir, los errores no son solo ruído.
+
+### CONSTRASTE DE HIPÓTESIS
+
+Analizando el precio medio de los inmuebles con y sin ascensor llegamos a la conclusión de que a priori estas medias son distintas y queremos contrastarlo. Para ello se ha comprobado la normalidad de los precios y las similitud de varianzas. Como resultado de la normalidad de los LOG_PRICE de los pisos tanto si tienen o no tienen ascensor se asemeja mucho a una normal pero sigue sin ser una normal estadísticamente. Se puede afirmar sin ningún tipo de duda que las varianzas son distintas, esto hace no recomendable el uso del ttest, aún así se decide hacerlo dando como resultado que se descarta la hipótesis nula del ttest.
+Como las varianzas son distintas los resultados del ttest no son determinantes pero afirmamos que las medias de precio son distintas.
+
+Se cogen las columnas de log-price filtradas en Madrid y Barcelona para analizar si lo que se observa de que las medias de los precios entre las 2 ciudades son iguales es cierto o no. Se fija con hipótesis nula que son iguales, se realizan las mismas pruebas previas que en el apartado anterior, se observa que los resultados previos las distribuciones de log-precios de las 2 ciudades son prácticamente normales sin llegar a serlo. Por desgracia las varianzas son distintas sin llegar a error y como resultado del ttest se obtiene que se puede descartar la hipótesis nula. Por lo que seguramente a pesar de que el ttest no es el mejor método debido a la diferencia de varianzas lo más razonable es pensar que la igualdad de las medias de los precios es casual.
